@@ -8,7 +8,7 @@ void string_copy(char *dst, const char *src, u64 size);
 u64 string_length(const char *str);
 
 /* caller is responsible to free the duplicant with the same allocator */
-char *string_duplicate(const char *str, struct Allocator *allocator);
+char *string_duplicate(struct Allocator *allocator, const char *str);
 
 bool string_equal(const char *a, const char *b);
 
