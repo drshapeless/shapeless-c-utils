@@ -18,7 +18,7 @@ char *string_duplicate(struct Allocator *allocator, const char *str) {
     if (allocator == NULL) {
         dup = malloc(len + 1);
     } else {
-        dup = allocator->allocate(allocator->ctx, len + 1);
+        dup = allocator->allocate(allocator, len + 1);
     }
 
     if (dup == NULL) {

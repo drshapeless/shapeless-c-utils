@@ -1,0 +1,34 @@
+#+title: readme
+
+* Allocator
+This is a very dangerous way of making allocator. But in this way, the
+allocator would be a lot cleaner.
+
+This is my original thought of making an allocator interface.
+#+begin_src c
+  struct Allocator {
+      PFN_allocate allocate;
+      PFN_deallocate deallocate;
+      void *ctx;
+  };
+#+end_src
+
+But how about stripping the context pointer out, to implicitly mean
+the context is right after the allocated allocator. So that when we
+know where the pointer of the Allocator is, we know where the context
+is.
+#+begin_src c
+  struct Allocator {
+      PFN_allocate allocate;
+      PFN_deallocate deallocate;
+  };
+
+  struct Allocator *allocator = allocator_create();
+  void *context = (void*)allocator + sizeof(struct Allocator);
+#+end_src
+
+Perfect.
+
+If we were to preallocate some memory for a allocator, the actual
+usable memory would be just behind the allocator struct and the
+context struct.

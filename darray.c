@@ -6,6 +6,13 @@
 
 #include <stdlib.h>
 
+struct DarrayHead {
+    u64 capacity;
+    u64 length;
+    u64 stride;
+    struct Allocator *allocator;
+};
+
 static u64 head_size = sizeof(struct DarrayHead);
 
 void *get_body(void *head) {
@@ -37,7 +44,7 @@ void *_darray_create(struct Allocator *allocator, u64 capacity, u64 stride) {
     if (allocator == NULL) {
         arr = malloc(head_size + body_size);
     } else {
-        arr = allocator->allocate(allocator->ctx, head_size + body_size);
+        arr = allocator->allocate(allocator, head_size + body_size);
     }
 
     memory_zero(arr, head_size + body_size);
@@ -57,7 +64,7 @@ void darray_destory(void *arr) {
         free(head);
     } else {
         u64 size = head->capacity;
-        head->allocator->deallocate(head->allocator->ctx, head, size);
+        head->allocator->deallocate(head->allocator, head, size);
     }
 }
 
@@ -77,7 +84,8 @@ u64 darray_stride(void *arr) {
 
 void *_darray_resize(void *arr, u64 size) {
     struct DarrayHead *head = get_head(arr);
-    u64 length = head->length;
+    u64 old_length = head->length;
+    u64 old_stride = head->stride;
     u64 old_size = head_size + head->stride * head->length;
     u64 new_size = head_size + head->stride * size;
 
@@ -85,10 +93,17 @@ void *_darray_resize(void *arr, u64 size) {
     if (head->allocator == NULL) {
         new_arr = realloc(arr, new_size);
     } else {
-        new_arr = head->allocator->allocate(head->allocator->ctx, new_size);
+        new_arr = head->allocator->allocate(head->allocator, new_size);
+        memory_zero(new_arr, new_size);
         memory_copy(new_arr, head, old_size);
-        head->allocator->deallocate(head->allocator->ctx, head, old_size);
+        head->allocator->deallocate(head->allocator, head, old_size);
     }
+
+    struct DarrayHead *new_head = new_arr;
+    new_head->capacity = size;
+    new_head->length = min(old_length, size);
+    /* The stride should have been copied by memory_copy, but just in case. */
+    new_head->stride = old_stride;
 
     void *body = get_body(new_arr);
 
@@ -97,21 +112,8 @@ void *_darray_resize(void *arr, u64 size) {
 
 void *darray_expand(void *arr) {
     struct DarrayHead *head = get_head(arr);
-    u64 new_capacity = head->capacity * DARRAY_RESIZE_FACTOR;
-    u64 old_body_size = head->stride * head->capacity;
-    u64 body_size = head->stride * new_capacity;
-    struct Allocator *allocator = head->allocator;
-    void *new_arr;
-    if (allocator == NULL) {
-        new_arr = realloc(head, head_size + body_size);
-    } else {
-        new_arr = allocator->allocate(allocator->ctx, head_size + body_size);
-        memory_copy(new_arr, head, head_size + old_body_size);
-        allocator->deallocate(allocator->ctx, head, head_size + old_body_size);
-    }
-
-    head = (struct DarrayHead *)new_arr;
-    head->capacity = new_capacity;
+    u64 new_capacity = head->capacity * DARRAY_EXPAND_FACTOR;
+    void *new_arr = _darray_resize(arr, new_capacity);
     return get_body(new_arr);
 }
 

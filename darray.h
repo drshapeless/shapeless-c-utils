@@ -4,14 +4,8 @@
 #include "defines.h"
 
 #define DARRAY_DEFAULT_CAPACITY 10
-#define DARRAY_RESIZE_FACTOR 2
+#define DARRAY_EXPAND_FACTOR 2
 
-struct DarrayHead {
-    u64 capacity;
-    u64 length;
-    u64 stride;
-    struct Allocator *allocator;
-};
 struct Allocator; /* forward declare */
 
 void *_darray_create(struct Allocator *allocator, u64 capacity, u64 stride);
