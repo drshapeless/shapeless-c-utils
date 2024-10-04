@@ -5,13 +5,13 @@
 
 struct Allocator;
 
-typedef void *(*PFN_allocate)(struct Allocator *allocator, size_t size);
+typedef void *(*PFN_allocate)(struct Allocator *allocator, usize size);
 typedef void *(*PFN_aligned_allocate)(struct Allocator *allocator,
-                                      size_t alignment,
-                                      size_t size);
+                                      usize alignment,
+                                      usize size);
 typedef void (*PFN_deallocate)(struct Allocator *allocator,
                                void *ptr,
-                               size_t size);
+                               usize size);
 
 /* User has to keep track of what type of allocator they are using. */
 /* Both allocation and deallocation take a context */
@@ -24,7 +24,7 @@ struct Allocator {
 /* if you pass the allocator pointer as NULL, */
 /* the functions should use libc malloc and free. */
 
-struct Allocator *allocator_monotonic_create(void *buffer, size_t size);
+struct Allocator *allocator_monotonic_create(void *buffer, usize size);
 void allocator_monotonic_clear(struct Allocator *allocator);
 void allocator_monotonic_destroy(struct Allocator *allocator);
 

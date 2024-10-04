@@ -5,19 +5,19 @@
 #include "assert.h"
 #include "memory.h"
 
-static const size_t ALLOCATOR_SIZE = sizeof(struct Allocator);
+static const usize ALLOCATOR_SIZE = sizeof(struct Allocator);
 
 struct MonotonicContext {
-    size_t capacity;
-    size_t current_pos;
+    usize capacity;
+    usize current_pos;
     bool is_stack;
 };
-static const size_t MONOTONIC_SIZE = sizeof(struct MonotonicContext);
+static const usize MONOTONIC_SIZE = sizeof(struct MonotonicContext);
 
-void *monotonic_allocate(struct Allocator *allocator, size_t size) {
+void *monotonic_allocate(struct Allocator *allocator, usize size) {
     struct MonotonicContext *ctx = (void *)allocator + ALLOCATOR_SIZE;
     void *memory_resource = (void *)allocator + ALLOCATOR_SIZE + MONOTONIC_SIZE;
-    size_t free_space = ctx->capacity - ctx->current_pos;
+    usize free_space = ctx->capacity - ctx->current_pos;
     SL_ASSERT_MSG(size > free_space, "monotonic_allocate not enough space");
 
     void *return_memory = memory_resource + ctx->current_pos;
@@ -25,12 +25,12 @@ void *monotonic_allocate(struct Allocator *allocator, size_t size) {
     return return_memory;
 }
 
-void monotonic_deallocate(struct Allocator *allocator, void *ptr, size_t size) {
+void monotonic_deallocate(struct Allocator *allocator, void *ptr, usize size) {
     /* You don't deallocate in monotonic allocator */
 }
 
 /* This will lose 5 void* worth of space in the front. */
-struct Allocator *allocator_monotonic_create(void *buffer, size_t size) {
+struct Allocator *allocator_monotonic_create(void *buffer, usize size) {
     SL_ASSERT_MSG(size > (ALLOCATOR_SIZE + MONOTONIC_SIZE),
                   "allocator_monotonic_create request size too small");
     struct Allocator *allocator;
