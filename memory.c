@@ -14,3 +14,15 @@ void memory_zero(void *ptr, usize size) {
 void memory_copy(void *dst, const void *src, usize size) {
     memcpy(dst, src, size);
 }
+
+bool memory_equal(const void *a, const void *b, usize size) {
+    u8 *l = (u8 *)a;
+    u8 *r = (u8 *)b;
+    for (usize i = 0; i < size; i++) {
+        if (l[i] != r[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
