@@ -66,3 +66,27 @@ void allocator_monotonic_destroy(struct Allocator *allocator) {
         free(allocator);
     }
 }
+
+void *libc_allocate(struct Allocator *allocator, usize size) {
+    return malloc(size);
+}
+
+void libc_deallocate(struct Allocator *allocator, void *ptr, usize size) {
+    free(ptr);
+}
+
+void allocator_libc_create(struct Allocator *allocator) {
+    allocator->allocate = libc_allocate;
+    allocator->deallocate = libc_deallocate;
+}
+
+void *allocator_reallocate(struct Allocator *allocator,
+                           void *ptr,
+                           usize old_size,
+                           usize new_size) {
+    void *new_ptr = allocator->allocate(allocator, new_size);
+    memory_zero(new_ptr, new_size);
+    memory_copy(new_ptr, ptr, old_size);
+    allocator->deallocate(allocator, ptr, old_size);
+    return new_ptr;
+}

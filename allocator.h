@@ -24,8 +24,16 @@ struct Allocator {
 /* if you pass the allocator pointer as NULL, */
 /* the functions should use libc malloc and free. */
 
+void *allocator_reallocate(struct Allocator *allocator,
+                           void *ptr,
+                           usize old_size,
+                           usize new_size);
+
 struct Allocator *allocator_monotonic_create(void *buffer, usize size);
 void allocator_monotonic_clear(struct Allocator *allocator);
 void allocator_monotonic_destroy(struct Allocator *allocator);
+
+void allocator_libc_create(struct Allocator *allocator);
+void allocator_libc_destroy(struct Allocator *allocator);
 
 #endif /* ALLOCATOR_H */

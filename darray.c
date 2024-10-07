@@ -13,16 +13,16 @@ struct DarrayHead {
     struct Allocator *allocator;
 };
 
-static u64 head_size = sizeof(struct DarrayHead);
+static u64 DARRAY_HEAD_SIZE = sizeof(struct DarrayHead);
 
-void *get_body(void *head) {
-    void *body = (u8 *)head + sizeof(struct DarrayHead);
+static void *get_body(void *head) {
+    void *body = (u8 *)head + DARRAY_HEAD_SIZE;
     return body;
 }
 
-struct DarrayHead *get_head(void *body) {
+static struct DarrayHead *get_head(void *body) {
     struct DarrayHead *head =
-        (struct DarrayHead *)((u8 *)body - sizeof(struct DarrayHead));
+        (struct DarrayHead *)((u8 *)body - DARRAY_HEAD_SIZE);
     return head;
 }
 
@@ -37,17 +37,11 @@ void *_darray_create(struct Allocator *allocator, u64 capacity, u64 stride) {
         return NULL;
     }
 
-    u64 head_size = sizeof(struct DarrayHead);
     u64 body_size = stride * capacity;
 
-    void *arr;
-    if (allocator == NULL) {
-        arr = malloc(head_size + body_size);
-    } else {
-        arr = allocator->allocate(allocator, head_size + body_size);
-    }
+    void *arr = allocator->allocate(allocator, DARRAY_HEAD_SIZE + body_size);
 
-    memory_zero(arr, head_size + body_size);
+    memory_zero(arr, DARRAY_HEAD_SIZE + body_size);
     struct DarrayHead *head = (struct DarrayHead *)arr;
     head->length = 0;
     head->capacity = capacity;
@@ -60,12 +54,8 @@ void *_darray_create(struct Allocator *allocator, u64 capacity, u64 stride) {
 
 void darray_destory(void *arr) {
     struct DarrayHead *head = get_head(arr);
-    if (head->allocator == NULL) {
-        free(head);
-    } else {
-        u64 size = head->capacity;
-        head->allocator->deallocate(head->allocator, head, size);
-    }
+    u64 size = head->capacity;
+    head->allocator->deallocate(head->allocator, head, size);
 }
 
 u64 darray_length(void *arr) {
@@ -86,18 +76,11 @@ void *_darray_resize(void *arr, u64 size) {
     struct DarrayHead *head = get_head(arr);
     u64 old_length = head->length;
     u64 old_stride = head->stride;
-    u64 old_size = head_size + head->stride * head->length;
-    u64 new_size = head_size + head->stride * size;
+    u64 old_size = DARRAY_HEAD_SIZE + head->stride * head->length;
+    u64 new_size = DARRAY_HEAD_SIZE + head->stride * size;
 
-    void *new_arr;
-    if (head->allocator == NULL) {
-        new_arr = realloc(arr, new_size);
-    } else {
-        new_arr = head->allocator->allocate(head->allocator, new_size);
-        memory_zero(new_arr, new_size);
-        memory_copy(new_arr, head, old_size);
-        head->allocator->deallocate(head->allocator, head, old_size);
-    }
+    void *new_arr =
+        allocator_reallocate(head->allocator, arr, old_size, new_size);
 
     struct DarrayHead *new_head = new_arr;
     new_head->capacity = size;
