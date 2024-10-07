@@ -16,7 +16,7 @@ typedef int32_t   i32;
 typedef int64_t   i64;
 typedef float     f32;
 typedef double    f64;
-typedef ptrdiff_t size;
+typedef ptrdiff_t isize;
 typedef size_t    usize;
 /* clang-format on */
 
