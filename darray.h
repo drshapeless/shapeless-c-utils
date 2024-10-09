@@ -24,6 +24,7 @@ u64 darray_stride(void *arr);
 void *_darray_resize(void *arr, u64 size);
 #define darray_resize(arr, size) arr = _darray_resize(arr, size);
 
+/* The push function is like a magic in C */
 void *_darray_push(void *arr, const void *value_ptr);
 #define darray_push(arr, value)         \
     {                                   \
