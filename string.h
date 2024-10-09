@@ -2,14 +2,18 @@
 #define STRING_H
 
 #include "defines.h"
-#include "allocator.h"
 
-void string_copy(char *dst, const char *src, u64 size);
-u64 string_length(const char *str);
+/* This is a dangerous function if the str is not null terminated */
+usize string_length(const char *str);
 
-/* caller is responsible to free the duplicant with the same allocator */
-char *string_duplicate(struct Allocator *allocator, const char *str);
+/* Return pos for the found char */
+/* Return -1 when not found */
+isize string_find_c(const char *str, usize len, char c);
 
-bool string_equal(const char *a, const char *b);
+/* len and find_str_len must not be zero */
+isize string_find(const char *str,
+                  usize len,
+                  const char *find_str,
+                  usize find_str_len);
 
 #endif /* STRING_H */

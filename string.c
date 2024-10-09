@@ -1,34 +1,40 @@
 #include "string.h"
 
-#include <string.h>
-
 #include "memory.h"
 
-void string_copy(char *dst, const char *src, u64 size) {
-    strncpy(dst, src, size);
-}
-
-u64 string_length(const char *str) {
-    return strlen(str);
-}
-
-char *string_duplicate(struct Allocator *allocator, const char *str) {
-    u64 len = sizeof(char) * string_length(str);
-    char *dup = NULL;
-    if (allocator == NULL) {
-        dup = malloc(len + 1);
-    } else {
-        dup = allocator->allocate(allocator, len + 1);
+usize string_length(const char *str) {
+    usize i = 0;
+    while (str[i] != '\0') {
+        i++;
     }
 
-    if (dup == NULL) {
-        return NULL;
-    }
-    memory_zero(dup, len + 1);
-    string_copy(dup, str, len);
-    return dup;
+    return i;
 }
 
-bool string_equal(const char *a, const char *b) {
-    return strcmp(a, b) == 0;
+isize string_find_c(const char *str, usize len, char c) {
+    for (usize i = 0; i < len; i++) {
+        if (str[i] == c) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+isize string_find(const char *str,
+                  usize len,
+                  const char *find_str,
+                  usize find_str_len) {
+    char *str_beg = (char *)str;
+    char *str_end = (char *)str + len;
+    char *p = str_beg;
+    while (p != str_end) {
+        if (*p == find_str[0] && str_end - p >= find_str_len &&
+            memory_equal(p, find_str, find_str_len)) {
+            return p - str_beg;
+        }
+        p++;
+    }
+
+    return -1;
 }
