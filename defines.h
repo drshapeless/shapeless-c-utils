@@ -20,6 +20,8 @@ typedef ptrdiff_t isize;
 typedef size_t    usize;
 /* clang-format on */
 
+#ifndef __cplusplus
+
 #define max(a, b)           \
     ({                      \
         typeof(a) _a = (a); \
@@ -37,5 +39,7 @@ typedef size_t    usize;
 #define clamp(x, lower, upper) (min(upper, max(x, lower)))
 
 #define lengthof(x) (sizeof(x) / sizeof((x)[0]))
+
+#endif // __cplusplus
 
 #endif /* DEFINES_H */
